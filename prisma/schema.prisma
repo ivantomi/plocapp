@@ -1,0 +1,118 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model User {
+  id         Int          @id @default(autoincrement())
+  name       String
+  email      String       @unique
+  role       Role
+  rfid       String       @unique
+  createdAt  DateTime     @default(now())
+  updatedAt  DateTime     @updatedAt
+  subjects   Subject[]    @relation("InstructorSubjects")
+  attendance Attendance[]
+  submissions Submission[]
+  messages   Message[]
+}
+
+model Subject {
+  id          Int         @id @default(autoincrement())
+  name        String
+  description String?
+  instructor  User        @relation("InstructorSubjects", fields: [instructorId], references: [id])
+  instructorId Int
+  classrooms  Classroom[]
+  assignments Assignment[]
+  messages    Message[]
+  timeslots   Timeslot[]
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @default(now())
+}
+
+model Classroom {
+  id         Int         @id @default(autoincrement())
+  roomNumber String
+  scannerId  Int         @unique
+  scanner    Scanner     @relation(fields: [scannerId], references: [id])
+  timeslots  Timeslot[]
+  createdAt  DateTime    @default(now())
+  updatedAt  DateTime    @default(now())
+  subjects Subject[]
+}
+
+model Scanner {
+  id        Int       @id @default(autoincrement())
+  location  String
+  classroom Classroom?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @default(now())
+}
+
+model Timeslot {
+  id          Int       @id @default(autoincrement())
+  subject     Subject   @relation(fields: [subjectId], references: [id])
+  subjectId   Int
+  classroom   Classroom @relation(fields: [classroomId], references: [id])
+  classroomId Int
+  startTime   DateTime
+  endTime     DateTime
+  attendance  Attendance[]
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @default(now())
+}
+
+model Attendance {
+  id         Int      @id @default(autoincrement())
+  user       User     @relation(fields: [userId], references: [id])
+  userId     Int
+  timeslot   Timeslot @relation(fields: [timeslotId], references: [id])
+  timeslotId Int
+  timestamp  DateTime @default(now())
+}
+
+model Assignment {
+  id          Int        @id @default(autoincrement())
+  subject     Subject    @relation(fields: [subjectId], references: [id])
+  subjectId   Int
+  title       String
+  description String?
+  dueDate     DateTime
+  submissions Submission[]
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @default(now())
+}
+
+model Submission {
+  id          Int        @id @default(autoincrement())
+  assignment  Assignment @relation(fields: [assignmentId], references: [id])
+  assignmentId Int
+  user        User       @relation(fields: [userId], references: [id])
+  userId      Int
+  filePath    String
+  grade       Int?
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @default(now())
+}
+
+model Message {
+  id         Int         @id @default(autoincrement())
+  subject    Subject     @relation(fields: [subjectId], references: [id])
+  subjectId  Int
+  sender     User        @relation(fields: [senderId], references: [id])
+  senderId   Int
+  content    String
+  createdAt  DateTime    @default(now())
+  updatedAt  DateTime    @default(now())
+}
+
+enum Role {
+  REGULAR
+  INSTRUCTOR
+  ADMIN
+}

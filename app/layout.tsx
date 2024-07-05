@@ -2,10 +2,9 @@ import type { Metadata } from "next";
 import { Quicksand } from "next/font/google";
 
 import "./globals.css";
-import Sidebar from "./components/navigation/Sidebar";
-import SearchBar from "./components/navigation/SearchBar";
+import ClientLayout from "./components/ClientLayout";
 
-const quickSand = Quicksand({subsets: ["latin"]});
+const quickSand = Quicksand({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
   title: "Roby",
@@ -19,11 +18,14 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={quickSand.className}>
-        <Sidebar />
-        <SearchBar />
-        {children}
-        </body>
+      <body
+        className={quickSand.className}
+        style={{ backgroundColor: "#1a1a1a" }}
+      >
+        <div className="flex flex-row">
+          <ClientLayout>{children}</ClientLayout>
+        </div>
+      </body>
     </html>
   );
 }

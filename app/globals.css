@@ -4,8 +4,9 @@
 @tailwind utilities;
 
 :root {
-  --icon-color: #6B7280; /* Default icon color */
+  --icon-color: #6b7280; /* Default icon color */
   --icon-hover-color: #ffffff; /* Icon color on hover */
+  --icon-hover-stroke-color: #8a2be2; /* Icon stroke color on hover */
 }
 
 .icon {

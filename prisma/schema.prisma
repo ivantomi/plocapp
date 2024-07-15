@@ -23,6 +23,15 @@ model User {
   messages   Message[]
 }
 
+model VerificationCode {
+  id          Int        @id @default(autoincrement())
+  code        String     @unique
+  createdAt   DateTime   @default(now())
+  expiresAt   DateTime
+  used        Boolean    @default(false)
+  usedById    Int?
+}
+
 model Subject {
   id          Int         @id @default(autoincrement())
   name        String
@@ -35,6 +44,7 @@ model Subject {
   timeslots   Timeslot[]
   createdAt   DateTime    @default(now())
   updatedAt   DateTime    @default(now())
+  imgURL      String?
 }
 
 model Classroom {

@@ -4,23 +4,21 @@ import { usePathname } from "next/navigation";
 
 import React from "react";
 import Sidebar from "./navigation/Sidebar";
-import SearchBar from "./navigation/SearchBar";
 
 const ClientLayout = ({ children }: { children: React.ReactNode }) => {
   const pathname = usePathname();
 
-  const showNavbar = !["/login", "/register", "forgot-password"].includes(
+  const showNavbar = !["/login", "/register", "/forgot-password"].includes(
     pathname
   );
   return (
     <>
       {showNavbar && (
-        <>
+        <div className="fixed">
           <Sidebar />
-          <SearchBar />
-        </>
+        </div>
       )}
-      {children}
+      <div className="ml-20 w-[calc(100vw-10rem)] mt-4">{children}</div>
     </>
   );
 };

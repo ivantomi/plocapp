@@ -220,7 +220,7 @@ export function DialogComponent() {
               </div>
               <div className="flex flex-col items-start gap-2 mt-4">
                 <Label className="text-right">RFID</Label>
-                <Input id="name" placeholder="Pedro Duarte" className="" />
+                <Input id="name" className="" />
               </div>
             </div>
             <DialogFooter>

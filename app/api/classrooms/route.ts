@@ -3,9 +3,9 @@ import { NextRequest, NextResponse } from "next/server";
 
 export const GET = async (req: NextRequest) => {
   const prisma = new PrismaClient();
-  const subjects = await prisma.subject.findMany({
-    include: { instructor: true },
+  const classrooms = await prisma.classroom.findMany({
+    include: { scanner: true, subjects: true, timeslots: true },
   });
 
-  return NextResponse.json(subjects);
+  return NextResponse.json(classrooms);
 };

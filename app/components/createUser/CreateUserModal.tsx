@@ -40,9 +40,10 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { ErrorAlertDialog } from "../navigation/ErrorDialog";
+import { User } from "@prisma/client";
 
 export function DialogComponent() {
-  const [newUser, setNewUser] = useState("");
+  const [newUser, setNewUser] = useState<User>();
   const [name, setName] = useState("");
   const [role, setRole] = useState("");
   const [username, setUsername] = useState("");
@@ -71,13 +72,30 @@ export function DialogComponent() {
     });
 
     const data = await response.json();
-    console.log(data);
-    setNewUser(data.user);
+    setNewUser(data);
+    console.log(newUser);
     if (!response.ok) {
       setError(data.error);
       setShowErrorDialog(true);
       return;
     }
+
+    const userInfo = `
+    Name: ${data.name}
+    Username: ${data.username}
+    Email: ${data.email}
+    Role: ${data.role}
+    RFID: ${data.rfid}
+  `;
+    const blob = new Blob([userInfo], { type: "text/plain" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `${data.username}_info.txt`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
   };
 
   const { isOpen, onClose } = useDialog();

@@ -7,6 +7,15 @@ generator client {
   provider = "prisma-client-js"
 }
 
+model Session {
+  id Int @id @default(autoincrement())
+  userId Int
+  user User @relation(fields: [userId], references: [id])
+  token  String @unique
+  createdAt DateTime @default(now())
+  expiresAt DateTime
+}
+
 model User {
   id         Int          @id @default(autoincrement())
   name       String
@@ -21,6 +30,7 @@ model User {
   attendance Attendance[]
   submissions Submission[]
   messages   Message[]
+  sessions   Session[]
 }
 
 model VerificationCode {

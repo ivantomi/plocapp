@@ -9,3 +9,7 @@ export interface ClassroomWithSubjectsAndTimeslots extends Classroom {
   timeslots: Timeslot[];
   scanner: Scanner;
 }
+
+export interface TokenPayload {
+  userId: string;
+}

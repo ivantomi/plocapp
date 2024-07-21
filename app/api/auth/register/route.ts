@@ -17,51 +17,53 @@ export const POST = async (req: NextRequest) => {
     email === "" ||
     password === "" ||
     role === "" ||
-    rfid === "" ||
-    verificationCode === ""
+    rfid === ""
+    // || verificationCode === ""
   ) {
     return NextResponse.json({ error: "Missing fields" }, { status: 400 });
   }
 
-  // const hashedPassword = bcrypt.hash(password, 10);
-
   try {
-    const checkVerificationCode =
-      await prisma.verificationCode.findFirstOrThrow({
-        where: {
-          code: verificationCode,
-        },
-      });
-    console.log(checkVerificationCode.code, verificationCode);
-    if (checkVerificationCode?.code !== verificationCode) {
-      alert("Invalid verification code");
-      return NextResponse.json({ error: "Invalid verification code" });
-    } else {
-      const user = await prisma.user.create({
-        data: {
-          name,
-          username,
-          email,
-          password,
-          role,
-          rfid,
-        },
-      });
+    // const checkVerificationCode =
+    //   await prisma.verificationCode.findFirstOrThrow({
+    //     where: {
+    //       code: verificationCode,
+    //     },
+    //   });
+    // console.log(checkVerificationCode.code, verificationCode);
+    // if (checkVerificationCode?.code !== verificationCode) {
+    //   alert("Invalid verification code");
+    //   return NextResponse.json({ error: "Invalid verification code" });
+    // } else {
 
-      if (!user) {
-        return NextResponse.json({ error: "Error creating user" });
-      }
+    const hashedPassword = await bcrypt.hash(password, 10);
 
-      await prisma.verificationCode.update({
-        where: {
-          code: verificationCode,
-        },
-        data: {
-          used: true,
-        },
-      });
-      return NextResponse.json(user);
+    const user = await prisma.user.create({
+      data: {
+        name,
+        username,
+        email,
+        password: hashedPassword,
+        role,
+        rfid,
+      },
+    });
+
+    if (!user) {
+      return NextResponse.json({ error: "Error creating user" });
     }
+
+    // await prisma.verificationCode.update({
+    //   where: {
+    //     code: verificationCode,
+    //   },
+    //   data: {
+    //     used: true,
+    //   },
+    // });
+
+    return NextResponse.json(user);
+    // }
   } catch (error) {
     return NextResponse.json({ error: "Error Creating User" }, { status: 400 });
   }

@@ -1,47 +1,73 @@
-import { NextApiRequest, NextApiResponse } from 'next';
-import { PrismaClient } from '@prisma/client';
-import bcrypt from 'bcryptjs';
-import jwt from 'jsonwebtoken';
+import { NextApiRequest, NextApiResponse } from "next";
+import { PrismaClient } from "@prisma/client";
+import bcrypt from "bcryptjs";
+import jwt from "jsonwebtoken";
+import { NextRequest, NextResponse } from "next/server";
 
-const prisma = new PrismaClient();
-const secret = process.env.JWT_SECRET
+const secret = process.env.JWT_SECRET;
 
-export default async function handler(req: NextApiRequest, res: NextApiResponse) {
-
-    // to make sure typescript knows JWT is always defined 
-    if (!secret) {
-        throw new Error("No JWT_SECRET found");
-    }
-
-  if (req.method === 'POST') {
-    const { email, password } = req.body;
-
-    if (!email || !password) {
-      return res.status(400).json({ error: 'Missing email and/or password' });
-    }
-
-    try {
-      const user = await prisma.user.findUnique({
-        where: { email },
-      });
-
-      if (!user) {
-        return res.status(401).json({ error: 'Invalid email and/or password' });
-      }
-
-      const isPasswordValid = await bcrypt.compare(password, user.password);
-      if (!isPasswordValid) {
-        return res.status(401).json({ error: 'Invalid email and/or password' });
-      }
-
-      const token = jwt.sign({ userId: user.id, role: user.role }, secret, { expiresIn: '1h' });
-
-      res.status(200).json({ message: 'Login successful', token });
-    } catch (error) {
-      res.status(500).json({ error: 'Login failed', details: error });
-    }
-  } else {
-    res.setHeader('Allow', ['POST']);
-    res.status(405).end(`Method ${req.method} is not allowed`);
+export const POST = async (req: NextRequest) => {
+  if (!secret) {
+    throw new Error("No JWT_SECRET found");
   }
-}
+
+  const prisma = new PrismaClient();
+
+  const body = await req.json();
+  const { email, password } = body;
+
+  if (!email || !password) {
+    return NextResponse.json(
+      { error: "Missing email and/or password" },
+      { status: 400 }
+    );
+  }
+
+  try {
+    const user = await prisma.user.findUnique({
+      where: { email },
+    });
+
+    if (!user) {
+      return NextResponse.json(
+        { error: "Missing email and/or password" },
+        { status: 400 }
+      );
+    }
+
+    // const isPasswordValid = await bcrypt.compare(password, user.password);
+    // if (!isPasswordValid) {
+    //   return NextResponse.json(
+    //     { error: "Missing email and/or password" },
+    //     { status: 401 }
+    //   );
+    // }
+
+    const token = jwt.sign({ userId: user.id, role: user.role }, secret, {
+      expiresIn: "1h",
+    });
+
+    await prisma.session.create({
+      data: {
+        token,
+        expiresAt: new Date(Date.now() + 1000 * 60 * 60),
+        user: { connect: { id: user.id } },
+      },
+    });
+
+    const response = NextResponse.json({
+      message: "Login successful",
+      user,
+      token,
+    });
+    response.cookies.set("token", token, {
+      httpOnly: true,
+      maxAge: 60 * 60,
+      path: "/",
+    });
+
+    return response;
+  } catch (error) {
+    NextResponse.json({ error: "Login failed", details: error });
+  }
+};

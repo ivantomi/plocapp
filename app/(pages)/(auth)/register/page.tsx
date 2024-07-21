@@ -48,7 +48,7 @@ export default function RegisterForm() {
           email,
           password,
           role: "ADMIN",
-          rfid: "0123",
+          rfid: "5859",
           verificationCode,
         }),
       });
